@@ -89,7 +89,7 @@ ensure_all_started(Application, Type, Started) ->
 
 %% @doc Generates an incrementing-each-second 31 bit integer.
 %% It will not wrap around until until {{2080,1,19},{3,14,7}} GMT.
--spec cseq() -> 
+-spec cseq() ->
     non_neg_integer().
 
 cseq() ->
@@ -97,11 +97,11 @@ cseq() ->
         <<_:1, CSeq:31>> -> ok;
         <<_:9, CSeq:31>> -> ok
     end,
-    CSeq.   
+    CSeq.
 
 
 %% @doc Generates a new printable random UUID.
--spec luid() -> 
+-spec luid() ->
     binary().
 
 luid() ->
@@ -113,18 +113,18 @@ luid() ->
     binary().
 
 uuid_4122() ->
-    Rand = hex(crypto:rand_bytes(4)),
+    Rand = hex(crypto:strong_rand_bytes(4)),
     <<A:16/bitstring, B:16/bitstring, C:16/bitstring>> = <<(nksip_lib:l_timestamp()):48>>,
     Hw = get_hwaddr(),
-    <<Rand/binary, $-, (hex(A))/binary, $-, (hex(B))/binary, $-, 
+    <<Rand/binary, $-, (hex(A))/binary, $-, (hex(B))/binary, $-,
       (hex(C))/binary, $-, Hw/binary>>.
 
 
 %% @doc Generates a new printable SHA hash binary over `Base' (using 160 bits, 27 chars).
--spec lhash(term()) -> 
+-spec lhash(term()) ->
     binary().
 
-lhash(Base) -> 
+lhash(Base) ->
     <<I:160/integer>> = sha(term_to_binary(Base)),
     case encode_integer(I) of
         Hash when byte_size(Hash) == 27 -> Hash;
@@ -141,14 +141,14 @@ sha(Term) -> crypto:hash(sha, Term).
 
 
 %% @doc Generates a new random tag of 6 chars
--spec uid() -> 
+-spec uid() ->
     binary().
 
 uid() ->
     hash({make_ref(), os:timestamp()}).
 
 %% @doc Generates a new tag of 6 chars based on a value.
--spec hash(term()) -> 
+-spec hash(term()) ->
     binary().
 
 hash(Base) ->
@@ -159,7 +159,7 @@ hash(Base) ->
 
 
 %% @doc Generates a new tag based on a value (only numbers and uppercase) of 7 chars
--spec hash36(term()) -> 
+-spec hash36(term()) ->
     binary().
 
 hash36(Base) ->
@@ -170,7 +170,7 @@ hash36(Base) ->
 
 
 %% @doc Get all local network ips.
--spec get_local_ips() -> 
+-spec get_local_ips() ->
     [inet:ip_address()].
 
 get_local_ips() ->
@@ -179,7 +179,7 @@ get_local_ips() ->
 
 
 %% @doc Equivalent to `find_main_ip(auto, ipv4)'.
--spec find_main_ip() -> 
+-spec find_main_ip() ->
     inet:ip_address().
 
 find_main_ip() ->
@@ -188,9 +188,9 @@ find_main_ip() ->
 
 %% @doc Finds the <i>best</i> local IP.
 %% If a network interface is supplied (as "en0") it returns its ip.
-%% If `auto' is used, probes `ethX' and `enX' interfaces. If none is available returns 
+%% If `auto' is used, probes `ethX' and `enX' interfaces. If none is available returns
 %% localhost
--spec find_main_ip(auto|string(), ipv4|ipv6) -> 
+-spec find_main_ip(auto|string(), ipv4|ipv6) ->
     inet:ip_address().
 
 find_main_ip(NetInterface, Type) ->
@@ -208,7 +208,7 @@ find_main_ip(NetInterface, Type) ->
                 proplists:get_keys(All)),
             find_main_ip(lists:sort(IFaces), All, Type);
         _ ->
-            find_main_ip([NetInterface], All, Type)   
+            find_main_ip([NetInterface], All, Type)
     end.
 
 
@@ -243,11 +243,11 @@ find_real_ip([], _Type) ->
 find_real_ip([{{65152,_,_,_,_,_,_,_}, _Netmask}|R], Type) ->
     find_real_ip(R, Type);
 
-find_real_ip([{{A,B,C,D}, Netmask}|_], ipv4) 
+find_real_ip([{{A,B,C,D}, Netmask}|_], ipv4)
              when Netmask /= {255,255,255,255} ->
     {A,B,C,D};
 
-find_real_ip([{{A,B,C,D,E,F,G,H}, Netmask}|_], ipv6) 
+find_real_ip([{{A,B,C,D,E,F,G,H}, Netmask}|_], ipv6)
              when Netmask /= {65535,65535,65535,65535,65535,65535,65535,65535} ->
     {A,B,C,D,E,F,G,H};
 
@@ -279,7 +279,7 @@ get_hwaddrs([{Name, Data}|Rest]) ->
     end;
 
 get_hwaddrs([]) ->
-    hex(crypto:rand_bytes(6)).
+    hex(crypto:strong_rand_bytes(6)).
 
 
 
@@ -305,7 +305,7 @@ l_timestamp() ->
 
 
 %% @doc Converts a `timestamp()' to a local `datetime()'.
--spec timestamp_to_local(timestamp()) -> 
+-spec timestamp_to_local(timestamp()) ->
     calendar:datetime().
 
 timestamp_to_local(Secs) ->
@@ -313,14 +313,14 @@ timestamp_to_local(Secs) ->
 
 
 %% @doc Converts a `timestamp()' to a gmt `datetime()'.
--spec timestamp_to_gmt(timestamp()) -> 
+-spec timestamp_to_gmt(timestamp()) ->
     calendar:datetime().
 
 timestamp_to_gmt(Secs) ->
     calendar:now_to_universal_time({0, Secs, 0}).
 
 %% @doc Generates a float representing `HHMMSS.MicroSecs' for a high resolution timer.
--spec l_timestamp_to_float(l_timestamp()) -> 
+-spec l_timestamp_to_float(l_timestamp()) ->
     float().
 
 l_timestamp_to_float(LStamp) ->
@@ -331,7 +331,7 @@ l_timestamp_to_float(LStamp) ->
 
 
 %% @doc Converts a local `datetime()' to a `timestamp()',
--spec gmt_to_timestamp(calendar:datetime()) -> 
+-spec gmt_to_timestamp(calendar:datetime()) ->
     timestamp().
 
 gmt_to_timestamp(DateTime) ->
@@ -339,7 +339,7 @@ gmt_to_timestamp(DateTime) ->
 
 
 %% @doc Converts a gmt `datetime()' to a `timestamp()'.
--spec local_to_timestamp(calendar:datetime()) -> 
+-spec local_to_timestamp(calendar:datetime()) ->
     timestamp().
 
 local_to_timestamp(DateTime) ->
@@ -352,7 +352,7 @@ local_to_timestamp(DateTime) ->
 
 
 %% @doc Equivalent to `proplists:get_value/2' but faster.
--spec get_value(term(), list()) -> 
+-spec get_value(term(), list()) ->
     term().
 
 get_value(Key, List) ->
@@ -360,7 +360,7 @@ get_value(Key, List) ->
 
 
 %% @doc Requivalent to `proplists:get_value/3' but faster.
--spec get_value(term(), list(), term()) -> 
+-spec get_value(term(), list(), term()) ->
     term().
 
 get_value(Key, List, Default) ->
@@ -372,7 +372,7 @@ get_value(Key, List, Default) ->
 
 %% @doc Similar to `get_value(Key, List, <<>>)' but converting the result into
 %% a `binary()'.
--spec get_binary(term(), list()) -> 
+-spec get_binary(term(), list()) ->
     binary().
 
 get_binary(Key, List) ->
@@ -381,7 +381,7 @@ get_binary(Key, List) ->
 
 %% @doc Similar to `get_value(Key, List, Default)' but converting the result into
 %% a `binary()'.
--spec get_binary(term(), list(), term()) -> 
+-spec get_binary(term(), list(), term()) ->
     binary().
 
 get_binary(Key, List, Default) ->
@@ -389,7 +389,7 @@ get_binary(Key, List, Default) ->
 
 
 %% @doc Similar to `get_value(Key, List, [])' but converting the result into a `list()'.
--spec get_list(term(), list()) -> 
+-spec get_list(term(), list()) ->
     list().
 
 get_list(Key, List) ->
@@ -398,17 +398,17 @@ get_list(Key, List) ->
 
 %% @doc Similar to `get_value(Key, List, Default)' but converting the result
 %% into a `list()'.
--spec get_list(term(), list(), term()) -> 
+-spec get_list(term(), list(), term()) ->
     list().
 
 get_list(Key, List, Default) ->
     to_list(get_value(Key, List, Default)).
 
 
-%% @doc Similar to `get_value(Key, List, 0)' but converting the result into 
+%% @doc Similar to `get_value(Key, List, 0)' but converting the result into
 %% an `integer()' or `error'.
--spec get_integer(term(), list()) -> 
-    integer() | error. 
+-spec get_integer(term(), list()) ->
+    integer() | error.
 
 get_integer(Key, List) ->
     to_integer(get_value(Key, List, 0)).
@@ -416,7 +416,7 @@ get_integer(Key, List) ->
 
 %% @doc Similar to `get_value(Key, List, Default)' but converting the result into
 %% a `integer()' or `error'.
--spec get_integer(term(), list(), term()) -> 
+-spec get_integer(term(), list(), term()) ->
     integer() | error.
 
 get_integer(Key, List, Default) ->
@@ -427,24 +427,24 @@ get_integer(Key, List, Default) ->
 %% @doc Stores a value in a list
 -spec store_value(term(), list()) ->
     list().
- 
+
 store_value(Term, List) ->
     case lists:member(Term, List) of
         true -> List;
         false -> [Term|List]
     end.
 
-    
+
 %% @doc Stores a value in a proplist
 -spec store_value(term(), term(), nksip:optslist()) ->
     nksip:optslist().
- 
+
 store_value(Key, Val, List) ->
     lists:keystore(Key, 1, List, {Key, Val}).
 
 
 %% @doc Converts anything into a `binary()'. Can convert ip addresses also.
--spec to_binary(term()) -> 
+-spec to_binary(term()) ->
     binary().
 
 to_binary(B) when is_binary(B) -> B;
@@ -458,7 +458,7 @@ to_binary(N) -> msg("~p", [N]).
 
 
 %% @doc Converts anything into a `string()'.
--spec to_list(string()|binary()|atom()|integer()) -> 
+-spec to_list(string()|binary()|atom()|integer()) ->
     string().
 
 to_list(L) when is_list(L) -> L;
@@ -471,11 +471,11 @@ to_list(I) when is_integer(I) -> erlang:integer_to_list(I).
 -spec to_integer(integer()|binary()|string()) ->
     integer() | error.
 
-to_integer(I) when is_integer(I) -> 
+to_integer(I) when is_integer(I) ->
     I;
-to_integer(B) when is_binary(B) -> 
+to_integer(B) when is_binary(B) ->
     to_integer(binary_to_list(B));
-to_integer(L) when is_list(L) -> 
+to_integer(L) when is_list(L) ->
     case catch list_to_integer(L) of
         I when is_integer(I) -> I;
         _ -> error
@@ -513,15 +513,15 @@ to_host(IpOrHost) ->
     to_host(IpOrHost, false).
 
 
-%% @doc Converts an IP or host to a binary host value. 
+%% @doc Converts an IP or host to a binary host value.
 % If `IsUri' and it is an IPv6 address, it will be enclosed in `[' and `]'
 -spec to_host(inet:ip_address() | string() | binary(), boolean()) ->
     binary().
 
-to_host({A,B,C,D}=Address, _IsUri) 
+to_host({A,B,C,D}=Address, _IsUri)
     when is_integer(A), is_integer(B), is_integer(C), is_integer(D) ->
     list_to_binary(inet_parse:ntoa(Address));
-to_host({A,B,C,D,E,F,G,H}=Address, IsUri) 
+to_host({A,B,C,D,E,F,G,H}=Address, IsUri)
     when is_integer(A), is_integer(B), is_integer(C), is_integer(D),
     is_integer(E), is_integer(F), is_integer(G), is_integer(H) ->
     case IsUri of
@@ -536,19 +536,19 @@ to_host(Host, _IsUri) ->
 -spec to_lower(string()|binary()|atom()) ->
     binary().
 
-to_lower(List) when is_list(List) -> 
+to_lower(List) when is_list(List) ->
     list_to_binary(string:to_lower(List));
-to_lower(Other) -> 
+to_lower(Other) ->
     to_lower(to_list(Other)).
 
 
 %% @doc converts a `string()' or `binary()' to an upper `binary()'.
 -spec to_upper(string()|binary()|atom()) ->
     binary().
-    
-to_upper(List) when is_list(List) -> 
+
+to_upper(List) when is_list(List) ->
     list_to_binary(string:to_upper(List));
-to_upper(Other) -> 
+to_upper(Other) ->
     to_upper(to_list(Other)).
 
 
@@ -568,17 +568,17 @@ strip(Rest) -> Rest.
 -spec unquote(list()|binary()) ->
     list().
 
-unquote(Bin) when is_binary(Bin) -> 
+unquote(Bin) when is_binary(Bin) ->
     unquote(binary_to_list(Bin));
 
-unquote(List) -> 
+unquote(List) ->
     case strip(List) of
-        [$"|Rest] -> 
+        [$"|Rest] ->
             case strip(lists:reverse(Rest)) of
                 [$"|Rest1] -> strip(lists:reverse(Rest1));
                 _ -> []
             end;
-        Other -> 
+        Other ->
             Other
     end.
 
@@ -603,24 +603,24 @@ encode_integer_36(Int) ->
 
 
 %% @private
--spec integer_to_list(integer(), integer(), string()) -> 
+-spec integer_to_list(integer(), integer(), string()) ->
     string().
 
 integer_to_list(I0, Base, R0) ->
     D = I0 rem Base,
     I1 = I0 div Base,
-    R1 = if 
+    R1 = if
         D >= 36 -> [D-36+$a|R0];
         D >= 10 -> [D-10+$A|R0];
         true -> [D+$0|R0]
     end,
-    if 
+    if
         I1 == 0 -> R1;
        true -> integer_to_list(I1, Base, R1)
     end.
 
 
-%% @doc Extracts all elements in `Proplist' having key `KeyOrKeys' or having key in 
+%% @doc Extracts all elements in `Proplist' having key `KeyOrKeys' or having key in
 %% `KeyOrKeys' if `KeyOrKeys' is a list.
 -spec extract([term()], term() | [term()]) ->
     [term()].
@@ -628,11 +628,11 @@ integer_to_list(I0, Base, R0) ->
 extract(PropList, KeyOrKeys) ->
     Fun = fun(Term) ->
         if
-            is_tuple(Term), is_list(KeyOrKeys) -> 
+            is_tuple(Term), is_list(KeyOrKeys) ->
                 lists:member(element(1, Term), KeyOrKeys);
             is_tuple(Term) ->
                 element(1, Term) == KeyOrKeys;
-            is_list(KeyOrKeys) -> 
+            is_list(KeyOrKeys) ->
                 lists:member(Term, KeyOrKeys);
             Term == KeyOrKeys ->
                 true;
@@ -643,7 +643,7 @@ extract(PropList, KeyOrKeys) ->
     lists:filter(Fun, PropList).
 
 
-%% @doc Deletes all elements in `Proplist' having key `KeyOrKeys' or having key in 
+%% @doc Deletes all elements in `Proplist' having key `KeyOrKeys' or having key in
 %% `KeyOrKeys' if `KeyOrKeys' is a list.
 -spec delete([term()], term() | [term()]) ->
     [term()].
@@ -651,11 +651,11 @@ extract(PropList, KeyOrKeys) ->
 delete(PropList, KeyOrKeys) ->
     Fun = fun(Term) ->
         if
-            is_tuple(Term), is_list(KeyOrKeys) -> 
+            is_tuple(Term), is_list(KeyOrKeys) ->
                 not lists:member(element(1, Term), KeyOrKeys);
             is_tuple(Term) ->
                 element(1, Term) /= KeyOrKeys;
-            is_list(KeyOrKeys) -> 
+            is_list(KeyOrKeys) ->
                 not lists:member(Term, KeyOrKeys);
             Term /= KeyOrKeys ->
                 true;
@@ -680,7 +680,7 @@ defaults(List, [{Key, Val}|Rest]) ->
 
 
 %% @doc Checks if `Term' is a `string()' or `[]'.
--spec is_string(Term::term()) -> 
+-spec is_string(Term::term()) ->
     boolean().
 
 is_string([]) -> true;
@@ -696,7 +696,7 @@ bjoin(List) ->
     bjoin(List, <<",">>).
 
 %% @doc Join each element in `List' into a `binary()', using the indicated `Separator'.
--spec bjoin(List::[term()], Separator::binary()) -> 
+-spec bjoin(List::[term()], Separator::binary()) ->
     binary().
 
 bjoin([], _J) ->
@@ -745,7 +745,7 @@ tokens([Ch|Rest], Chs, Tokens) ->
 
 
 %% @private
--spec hex(binary()|string()) -> 
+-spec hex(binary()|string()) ->
     binary().
 
 hex(B) when is_binary(B) -> hex(binary_to_list(B), []);
@@ -782,7 +782,7 @@ cancel_timer(Ref) when is_reference(Ref) ->
     case erlang:cancel_timer(Ref) of
         false ->
             receive {timeout, Ref, _} -> 0
-            after 0 -> false 
+            after 0 -> false
             end;
         RemainingTime ->
             RemainingTime
@@ -793,15 +793,15 @@ cancel_timer(_) ->
 
 
 %% @private
--spec msg(string(), [term()]) -> 
+-spec msg(string(), [term()]) ->
     binary().
 
 msg(Msg, Vars) ->
     case catch list_to_binary(io_lib:format(Msg, Vars)) of
-        {'EXIT', _} -> 
+        {'EXIT', _} ->
             lager:warning("MSG PARSE ERROR: ~p, ~p", [Msg, Vars]),
             <<"Msg parser error">>;
-        Result -> 
+        Result ->
             Result
     end.
 

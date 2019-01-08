@@ -31,13 +31,13 @@
 
 
 basic_test_() ->
-    {setup, spawn, 
+    {setup, spawn,
         fun() -> start() end,
         fun(_) -> stop() end,
         [
-            {timeout, 60, fun running/0}, 
-            {timeout, 60, fun transport/0}, 
-            {timeout, 60, fun cast_info/0}, 
+            {timeout, 60, fun running/0},
+            {timeout, 60, fun transport/0},
+            {timeout, 60, fun cast_info/0},
             {timeout, 60, fun stun/0}
         ]
     }.
@@ -90,26 +90,26 @@ running() ->
     timer:sleep(100),
     {ok, P1} = gen_udp:open(5090, [{reuseaddr, true}, {ip, {0,0,0,0}}]),
     ok = gen_udp:close(P1),
-    
-    {error, {invalid_transport, _}} = 
+
+    {error, {invalid_transport, _}} =
         nksip:start(name, ?MODULE, none, [{transports, [{other, all, any}]}]),
-    {error, {invalid_transport, _}} = 
+    {error, {invalid_transport, _}} =
         nksip:start(name, ?MODULE, none, [{transports, [{udp, {1,2,3}, any}]}]),
-    {error, {invalid_config, nksip_registrar_min_time}} = 
-        nksip:start(name, ?MODULE, none, 
+    {error, {invalid_config, nksip_registrar_min_time}} =
+        nksip:start(name, ?MODULE, none,
                     [{plugins, [nksip_registrar]}, {nksip_registrar_min_time, -1}]),
 
-    {error, {invalid_plugin, invalid}} = 
+    {error, {invalid_plugin, invalid}} =
         nksip:start(name, ?MODULE, none, [{plugins, [nksip_registrar, invalid]}]),
 
     ok.
-    
+
 
 transport() ->
-    Body = base64:encode(crypto:rand_bytes(100)),
+    Body = base64:encode(crypto:strong_rand_bytes(100)),
     Opts1 = [
-        {add, "x-nksip", "test1"}, 
-        {add, "x-nk-op", "reply-request"}, 
+        {add, "x-nksip", "test1"},
+        {add, "x-nk-op", "reply-request"},
         {contact, "sip:aaa:123, sips:bbb:321"},
         {add, user_agent, "My SIP"},
         {body, Body},
@@ -132,7 +132,7 @@ transport() ->
         {_, {tcp, {127,0,0,1}, 5060, <<>>}}
     ] = Values2,
 
-    % Remote has generated a SIPS Contact   
+    % Remote has generated a SIPS Contact
     {ok, 200, Values3} = nksip_uac:options(client1, "sips:127.0.0.1", [Fields2]),
     [
         {_, [#uri{scheme=sips, port=5061}]},
@@ -164,18 +164,18 @@ transport() ->
     {ok, 200, Values5} = nksip_uac:options(client1, "sip:127.0.0.1", Opts5),
     [{body, RespBody5}] = Values5,
     Req5 = binary_to_term(base64:decode(RespBody5)),
-    [#uri{user=(<<"client1">>), domain=(<<"mihost">>), port=5070}] = 
+    [#uri{user=(<<"client1">>), domain=(<<"mihost">>), port=5070}] =
         nksip_sipmsg:meta(contacts, Req5),
     [
         #uri{domain=(<<"127.0.0.1">>), port=0, opts=[<<"lr">>]},
         #uri{domain=(<<"aaa">>), port=0, opts=[<<"lr">>]},
         #uri{domain=(<<"bbb">>), port=123, opts=[<<"lr">>]}
-    ] = 
+    ] =
        nksip_sipmsg:meta(routes, Req5),
 
-    {ok, 200, []} = nksip_uac:options(client1, "sip:127.0.0.1", 
+    {ok, 200, []} = nksip_uac:options(client1, "sip:127.0.0.1",
                                 [{add, "x-nk-op", "reply-stateless"}]),
-    {ok, 200, []} = nksip_uac:options(client1, "sip:127.0.0.1", 
+    {ok, 200, []} = nksip_uac:options(client1, "sip:127.0.0.1",
                                 [{add, "x-nk-op", "reply-stateful"}]),
 
     % Cover ip resolution
@@ -208,9 +208,9 @@ cast_info() ->
 
 
 stun() ->
-    {ok, {{0,0,0,0}, 5070}, {{127,0,0,1}, 5070}} = 
+    {ok, {{0,0,0,0}, 5070}, {{127,0,0,1}, 5070}} =
         nksip_uac:stun(client1, "sip:127.0.0.1", []),
-    {ok, {{0,0,0,0}, 5060}, {{127,0,0,1}, 5060}} = 
+    {ok, {{0,0,0,0}, 5060}, {{127,0,0,1}, 5060}} =
         nksip_uac:stun(server1, "sip:127.0.0.1:5070", []),
     ok.
 
