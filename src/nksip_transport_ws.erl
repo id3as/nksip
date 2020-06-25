@@ -204,7 +204,7 @@ init([AppId, Transp, Dispatch, Opts]) ->
     gen_server_call(#state{}).
 
 handle_call(Msg, _From, State) -> 
-    lager:error("Module ~p received unexpected call ~p", [?MODULE, Msg]),
+    logger:error("Module ~p received unexpected call ~p", [?MODULE, Msg]),
     {noreply, State}.
 
 %% @private
@@ -212,7 +212,7 @@ handle_call(Msg, _From, State) ->
     gen_server_cast(#state{}).
 
 handle_cast(Msg, State) -> 
-    lager:error("Module ~p received unexpected cast ~p", [?MODULE, Msg]),
+    logger:error("Module ~p received unexpected cast ~p", [?MODULE, Msg]),
     {noreply, State}.
 
 
@@ -224,7 +224,7 @@ handle_info({'DOWN', MRef, process, _Pid, _Reason}, #state{webserver=MRef}=State
     {noreply, State};
     
 handle_info(Msg, State) -> 
-    lager:warning("Module ~p received unexpected info ~p", [?MODULE, Msg]),
+    logger:warning("Module ~p received unexpected info ~p", [?MODULE, Msg]),
     {noreply, State}.
 
 

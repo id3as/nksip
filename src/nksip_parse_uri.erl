@@ -60,7 +60,7 @@ uris(String, Acc) ->
         {#uri{}=Uri, []} -> lists:reverse([Uri|Acc]);
         {#uri{}=Uri, Rest} -> uris(Rest, [Uri|Acc]);
         {error, _Type, _Line} -> 
-            % lager:info("Error parsing uri ~p: ~p (~p)", [String, _Type, _Line]),
+            % logger:info("Error parsing uri ~p: ~p (~p)", [String, _Type, _Line]),
             error
     end.
 

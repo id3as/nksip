@@ -189,7 +189,7 @@ handle_call(pending, _From, #state{pending=Pending}=SD) ->
     {reply, dict:size(Pending), SD};
 
 handle_call(Msg, _From, SD) -> 
-    lager:error("Module ~p received unexpected call ~p", [?MODULE, Msg]),
+    logger:error("Module ~p received unexpected call ~p", [?MODULE, Msg]),
     {noreply, SD}.
 
 
@@ -208,7 +208,7 @@ handle_cast({incoming, SipMsg}, SD) ->
     end;
 
 handle_cast(Msg, SD) ->
-    lager:error("Module ~p received unexpected event: ~p", [?MODULE, Msg]),
+    logger:error("Module ~p received unexpected event: ~p", [?MODULE, Msg]),
     {noreply, SD}.
 
 
@@ -224,7 +224,7 @@ handle_info({sync_work_ok, Ref, Pid}, #state{pending=Pending}=SD) ->
             WorkList1 = lists:keydelete(Ref, 1, WorkList),
             dict:store(Pid, {AppId, CallId, WorkList1}, Pending);
         error ->
-            lager:warning("Receiving sync_work_ok for unknown work"),
+            logger:warning("Receiving sync_work_ok for unknown work"),
             Pending
     end,
     {noreply, SD#state{pending=Pending1}};
@@ -256,7 +256,7 @@ handle_info({'DOWN', _MRef, process, Pid, _Reason}, SD) ->
     end;
 
 handle_info(Info, SD) -> 
-    lager:warning("Module ~p received unexpected info: ~p", [?MODULE, Info]),
+    logger:warning("Module ~p received unexpected info: ~p", [?MODULE, Info]),
     {noreply, SD}.
 
 

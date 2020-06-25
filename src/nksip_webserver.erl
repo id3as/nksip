@@ -207,7 +207,7 @@ handle_call(state, _From, State) ->
     {reply, State, State};
 
 handle_call(Msg, _From, State) -> 
-    lager:error("Module ~p received unexpected call ~p", [?MODULE, Msg]),
+    logger:error("Module ~p received unexpected call ~p", [?MODULE, Msg]),
     {noreply, State}.
 
 %% @private
@@ -230,7 +230,7 @@ handle_cast(stop_all, State) ->
     {noreply, State#state{servers=[]}};
 
 handle_cast(Msg, State) -> 
-    lager:error("Module ~p received unexpected cast ~p", [?MODULE, Msg]),
+    logger:error("Module ~p received unexpected cast ~p", [?MODULE, Msg]),
     {noreply, State}.
 
 
@@ -249,7 +249,7 @@ handle_info({'DOWN', MRef, process, _Pid, _Reason}, State) ->
                 false ->
                     {noreply, State};
                 {value, #server_info{ref=Ref}, Servers1} ->
-                    lager:warning("Web server ~p has failed!", [Ref]),
+                    logger:warning("Web server ~p has failed!", [Ref]),
                     {noreply, State#state{servers=Servers1}}
             end
     end.

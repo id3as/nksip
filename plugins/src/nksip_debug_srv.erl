@@ -22,7 +22,7 @@
 -behaviour(gen_server).
 
 -author('Carlos Gonzalez <carlosj.gf@gmail.com>').
--export([start_link/0, init/1, terminate/2, code_change/3, handle_call/3, 
+-export([start_link/0, init/1, terminate/2, code_change/3, handle_call/3,
          handle_cast/2, handle_info/2]).
 
 -include("../include/nksip.hrl").
@@ -37,9 +37,9 @@
 %% @private
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-        
 
-%% @private 
+
+%% @private
 -spec init(term()) ->
     gen_server_init(#state{}).
 
@@ -52,8 +52,8 @@ init([]) ->
 -spec handle_call(term(), from(), #state{}) ->
     gen_server_call(#state{}).
 
-handle_call(Msg, _From, State) -> 
-    lager:error("Module ~p received unexpected call ~p", [?MODULE, Msg]),
+handle_call(Msg, _From, State) ->
+    logger:error("Module ~p received unexpected call ~p", [?MODULE, Msg]),
     {noreply, State}.
 
 
@@ -61,8 +61,8 @@ handle_call(Msg, _From, State) ->
 -spec handle_cast(term(), #state{}) ->
     gen_server_cast(#state{}).
 
-handle_cast(Msg, State) -> 
-    lager:error("Module ~p received unexpected cast ~p", [?MODULE, Msg]),
+handle_cast(Msg, State) ->
+    logger:error("Module ~p received unexpected cast ~p", [?MODULE, Msg]),
     {noreply, State}.
 
 
@@ -70,8 +70,8 @@ handle_cast(Msg, State) ->
 -spec handle_info(term(), #state{}) ->
     gen_server_info(#state{}).
 
-handle_info(Info, State) -> 
-    lager:warning("Module ~p received unexpected info: ~p", [?MODULE, Info]),
+handle_info(Info, State) ->
+    logger:warning("Module ~p received unexpected info: ~p", [?MODULE, Info]),
     {noreply, State}.
 
 
@@ -87,11 +87,10 @@ code_change(_OldVsn, State, _Extra) ->
 -spec terminate(term(), #state{}) ->
     gen_server_terminate().
 
-terminate(_Reason, _State) ->  
+terminate(_Reason, _State) ->
     ok.
 
 
 %% ===================================================================
 %% Private
 %% ===================================================================
-

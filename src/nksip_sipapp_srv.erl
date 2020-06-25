@@ -435,7 +435,7 @@ save_uuid(Path, AppId, UUID) ->
         ok ->
             ok;
         Error ->
-            lager:warning("Could not write file ~s: ~p", [Path, Error]),
+            logger:warning("Could not write file ~s: ~p", [Path, Error]),
             ok
     end.
 

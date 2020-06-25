@@ -258,7 +258,7 @@ terminate(_Reason, _State) ->
     {stop, Reason::term(), State::term()}.
 
 handle_call(Msg, _From, State) ->
-    lager:warning("Unexpected handle_call in ~p: ~p", [Msg, ?MODULE]),
+    logger:warning("Unexpected handle_call in ~p: ~p", [Msg, ?MODULE]),
     {noreply, State}.
 
 
@@ -270,7 +270,7 @@ handle_call(Msg, _From, State) ->
     {stop, Reason::term(), State::term()}.
 
 handle_cast(Msg, State) ->
-    lager:warning("Unexpected handle_cast in ~p: ~p", [Msg, ?MODULE]),
+    logger:warning("Unexpected handle_cast in ~p: ~p", [Msg, ?MODULE]),
     {noreply, State}.
 
 

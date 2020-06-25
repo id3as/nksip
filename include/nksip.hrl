@@ -32,9 +32,9 @@
     DO_LOG(Level, App, CallId, Text, Opts),
     case CallId of
         <<>> ->
-            lager:Level([{app, App}], "~p "++Text, [App|Opts]);
-        _ -> 
-            lager:Level([{app, App}, {call_id, CallId}], "~p (~s) "++Text, [App, CallId|Opts])
+            logger:Level("~p "++Text, [App|Opts], #{ app => App });
+        _ ->
+            logger:Level("~p (~s) "++Text, [App, CallId|Opts], #{ app => App, call_id => CallId })
     end).
 
 -define(DO_DEBUG(AppId, CallId, Level, Text, List),
@@ -44,35 +44,35 @@
     end).
 
 
--define(debug(AppId, CallId, Text, List), 
+-define(debug(AppId, CallId, Text, List),
     ?DO_DEBUG(AppId, CallId, debug, Text, List),
     case AppId:config_log_level() >= 8 of
         true -> ?DO_LOG(debug, AppId:name(), CallId, Text, List);
         false -> ok
     end).
 
--define(info(AppId, CallId, Text, List), 
+-define(info(AppId, CallId, Text, List),
     ?DO_DEBUG(AppId, CallId, info, Text, List),
     case AppId:config_log_level() >= 7 of
         true -> ?DO_LOG(info, AppId:name(), CallId, Text, List);
         false -> ok
     end).
 
--define(notice(AppId, CallId, Text, List), 
+-define(notice(AppId, CallId, Text, List),
     ?DO_DEBUG(AppId, CallId, notice, Text, List),
     case AppId:config_log_level() >= 6 of
         true -> ?DO_LOG(notice, AppId:name(), CallId, Text, List);
         false -> ok
     end).
 
--define(warning(AppId, CallId, Text, List), 
+-define(warning(AppId, CallId, Text, List),
     ?DO_DEBUG(AppId, CallId, warning, Text, List),
     case AppId:config_log_level() >= 5 of
         true -> ?DO_LOG(warning, AppId:name(), CallId, Text, List);
         false -> ok
     end).
 
--define(error(AppId, CallId, Text, List), 
+-define(error(AppId, CallId, Text, List),
     ?DO_DEBUG(AppId, CallId, error, Text, List),
     case AppId:config_log_level() >= 4 of
         true -> ?DO_LOG(error, AppId:name(), CallId, Text, List);
@@ -80,12 +80,12 @@
     end).
 
 
--define(N(T), lager:notice(T)).
--define(N(T,P), lager:notice(T,P)).
--define(W(T), lager:warning(T)).
--define(W(T,P), lager:warning(T,P)).
--define(E(T), lager:error(T)).
--define(E(T,P), lager:error(T,P)).
+-define(N(T), logger:notice(T)).
+-define(N(T,P), logger:notice(T,P)).
+-define(W(T), logger:warning(T)).
+-define(W(T,P), logger:warning(T,P)).
+-define(E(T), logger:error(T)).
+-define(E(T,P), logger:error(T,P)).
 
 -include_lib("kernel/include/inet_sctp.hrl").
 
@@ -96,20 +96,20 @@
 
 -type from() :: term().
 
--type gen_server_time() :: 
+-type gen_server_time() ::
         non_neg_integer() | hibernate.
 
 -type gen_server_init(State) ::
         {ok, State} | {ok, State, gen_server_time()} | ignore.
 
--type gen_server_cast(State) :: 
+-type gen_server_cast(State) ::
         {noreply, State} | {noreply, State, gen_server_time()} |
         {stop, term(), State}.
 
--type gen_server_info(State) :: 
+-type gen_server_info(State) ::
         gen_server_cast(State).
 
--type gen_server_call(State) :: 
+-type gen_server_call(State) ::
         {reply, term(), State} | {reply, term(), State, gen_server_time()} |
         {stop, term(), term(), State} | gen_server_cast(State).
 
@@ -143,7 +143,7 @@
     listen_ip :: inet:ip_address(),         % Ip this transport must report as listening
     listen_port :: inet:port_number(),
     sctp_id :: integer(),
-    resource = <<>> :: binary()      
+    resource = <<>> :: binary()
 }).
 
 
@@ -185,9 +185,9 @@
 -record(uri, {
     disp = <<>> :: binary(),
     scheme = sip :: nksip:scheme(),
-    user = <<>> :: binary(), 
-    pass = <<>> :: binary(), 
-    domain = <<"invalid.invalid">> :: binary(), 
+    user = <<>> :: binary(),
+    pass = <<>> :: binary(),
+    domain = <<"invalid.invalid">> :: binary(),
     port = 0 :: inet:port_number(),             % 0 means "no port in message"
     path = <<>> :: binary(),
     opts = [] :: nksip:optslist(),
@@ -268,7 +268,7 @@
     media :: binary(),                  % <<"audio">>, ...
     port = 0 :: inet:port_number(),
     nports = 1 :: integer(),
-    proto = <<"RTP/AVP">> :: binary(),      
+    proto = <<"RTP/AVP">> :: binary(),
     fmt = [] :: [binary()],             % <<"0">>, <<"101">> ...
     info :: binary(),
     connect :: nksip_sdp:address(),
@@ -280,10 +280,10 @@
 -record(sdp, {
     sdp_vsn = <<"0">> :: binary(),
     user = <<"-">> :: binary(),
-    id = 0 :: non_neg_integer(), 
-    vsn = 0 :: non_neg_integer(), 
+    id = 0 :: non_neg_integer(),
+    vsn = 0 :: non_neg_integer(),
     address = {<<"IN">>, <<"IP4">>, <<"0.0.0.0">>} :: nksip_sdp:address(),
-    session = <<"nksip">> :: binary(), 
+    session = <<"nksip">> :: binary(),
     info :: binary(),
     uri :: binary(),
     email :: binary(),
@@ -307,16 +307,16 @@
 
 % Thks to http://rustyklophaus.com/articles/20110209-BeautifulErlangTiming.html
 -ifndef(TIMEON).
--define(TIMEON, 
+-define(TIMEON,
     erlang:put(debug_timer, [now()|
-                                case erlang:get(debug_timer) == undefined of 
-                                    true -> []; 
+                                case erlang:get(debug_timer) == undefined of
+                                    true -> [];
                                     false -> erlang:get(debug_timer) end])).
--define(TIMEOFF(Var), 
+-define(TIMEOFF(Var),
     io:format("~s :: ~10.2f ms : ~p~n", [
-        string:copies(" ", length(erlang:get(debug_timer))), 
+        string:copies(" ", length(erlang:get(debug_timer))),
         (timer:now_diff(now(), hd(erlang:get(debug_timer)))/1000), Var
-    ]), 
+    ]),
     erlang:put(debug_timer, tl(erlang:get(debug_timer)))).
 -endif.
 
@@ -326,7 +326,6 @@
 -endif.
 
 -ifndef(I).
--define(I(S,P), lager:info(S++"\n", P)).
+-define(I(S,P), logger:info(S++"\n", P)).
 -define(I(S), ?I(S, [])).
 -endif.
-

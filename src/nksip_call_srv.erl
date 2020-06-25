@@ -118,7 +118,7 @@ handle_call(get_data, _From, Call) ->
     {reply, {Trans, Forks, Dialogs}, Call};
  
  handle_call(Msg, _From, Call) ->
-    lager:error("Module ~p received unexpected sync event: ~p", [?MODULE, Msg]),
+    logger:error("Module ~p received unexpected sync event: ~p", [?MODULE, Msg]),
     {noreply, Call}.
 
 
@@ -137,7 +137,7 @@ handle_cast(stop, Call) ->
     {stop, normal, Call};
 
 handle_cast(Msg, Call) ->
-    lager:error("Module ~p received unexpected event: ~p", [?MODULE, Msg]),
+    logger:error("Module ~p received unexpected event: ~p", [?MODULE, Msg]),
     {noreply, Call}.
 
 
@@ -158,7 +158,7 @@ handle_info({timeout, Ref, Type}, Call) ->
 %     next(Call);
 
 handle_info(Info, Call) ->
-    lager:warning("Module ~p received unexpected info: ~p", [?MODULE, Info]),
+    logger:warning("Module ~p received unexpected info: ~p", [?MODULE, Info]),
     {noreply, Call}.
 
 
